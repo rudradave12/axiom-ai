@@ -60,15 +60,20 @@ function initializeFirebaseServices(): void {
         if (debugToken) {
           (window as unknown as Record<string, unknown>).FIREBASE_APPCHECK_DEBUG_TOKEN = debugToken;
         }
-        try {
-          initializeAppCheck(app, {
-            provider: new ReCaptchaV3Provider(
-              process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!
-            ),
-            isTokenAutoRefreshEnabled: true,
-          });
-        } catch (err) {
-          console.warn('Firebase App Check initialization failed:', err);
+        
+        const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+        if (siteKey) {
+          try {
+            initializeAppCheck(app, {
+              provider: new ReCaptchaV3Provider(siteKey),
+              isTokenAutoRefreshEnabled: true,
+            });
+          } catch (err) {
+            console.warn('Firebase App Check initialization failed:', err);
+          }
+        } else {
+          // eslint-disable-next-line no-console
+          console.log('Firebase App Check is disabled because NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set.');
         }
       }
     }
