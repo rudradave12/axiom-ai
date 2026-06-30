@@ -1,0 +1,40 @@
+# Node dependencies
+node_modules
+.pnpm-store
+
+# Next.js build outputs
+.next
+out
+
+# Expo build and native directories
+.expo
+android
+ios
+*.ipa
+*.apk
+
+# General build outputs
+dist
+build
+.turbo
+
+# Environment secrets
+.env
+.env.*.local
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# IDE and system files
+.DS_Store
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
