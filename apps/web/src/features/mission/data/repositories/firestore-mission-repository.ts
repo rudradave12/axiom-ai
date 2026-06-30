@@ -15,6 +15,7 @@ import {
 import { db } from '@/shared/lib/firebase';
 import { MissionRepository } from '../../domain/repositories/mission-repository';
 import { Mission, GoalType, MissionStatus, PulseStatus } from '../../domain/entities/mission';
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 
 interface FirestoreMissionDoc {
   goal?: string;
@@ -136,9 +137,9 @@ export class FirestoreMissionRepository implements MissionRepository {
       version: mission.version,
     };
     if (batch) {
-      batch.set(docRef, payload);
+      batch.set(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     } else {
-      await setDoc(docRef, payload);
+      await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     }
   }
 
@@ -156,7 +157,7 @@ export class FirestoreMissionRepository implements MissionRepository {
     if (updates.completedAt !== undefined) payload.completedAt = updates.completedAt ? Timestamp.fromDate(updates.completedAt) : null;
     if (updates.version !== undefined) payload.version = updates.version;
 
-    await updateDoc(docRef, payload);
+    await updateDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async softDeleteMission(userId: string, missionId: string): Promise<void> {

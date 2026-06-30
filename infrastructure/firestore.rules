@@ -5,25 +5,31 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
       match /missions/{missionId} {
-        allow read, update, delete: if request.auth != null && request.auth.uid == userId;
-        // Verify schema validation boundaries for high-security constraints on create
-        allow create: if request.auth != null 
-                      && request.auth.uid == userId
-                      && request.resource.data.title is string 
-                      && request.resource.data.title.size() > 0 
-                      && request.resource.data.title.size() < 256
-                      && request.resource.data.goal is string 
-                      && request.resource.data.goal.size() > 0;
+        allow read, delete: if request.auth != null && request.auth.uid == userId;
+        
+        allow create, update: if request.auth != null 
+                              && request.auth.uid == userId
+                              && request.resource.data.keys().hasAll(['title', 'goal'])
+                              && request.resource.data.title is string
+                              && request.resource.data.title.size() > 0
+                              && request.resource.data.title.size() <= 100
+                              && request.resource.data.goal is string;
       }
 
-      match /missions/{missionId}/files/{fileId} {
-        allow read, update, delete: if request.auth != null && request.auth.uid == userId;
-        // Verify file metadata constraints on create
-        allow create: if request.auth != null 
-                      && request.auth.uid == userId
-                      && request.resource.data.size is int
-                      && request.resource.data.size < 52428800 // 50MB
-                      && request.resource.data.mimeType is string;
+      match /missions/{missionId}/tasks/{taskId} {
+        allow read, delete: if request.auth != null && request.auth.uid == userId;
+        allow create, update: if request.auth != null 
+                              && request.auth.uid == userId
+                              && request.resource.data.title is string
+                              && request.resource.data.status in ['todo', 'in-progress', 'done', 'skipped', 'blocked'];
+      }
+
+      match /missions/{missionId}/timeline/{timelineId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /missions/{missionId}/chat/{messageId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
       }
 
       match /missions/{missionId}/{document=**} {

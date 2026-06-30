@@ -1,3 +1,4 @@
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 import {
   doc,
   getDoc,
@@ -83,9 +84,9 @@ export class FirestoreExecutionRepository implements ExecutionRepository {
       updatedAt: Timestamp.fromDate(graph.updatedAt),
     };
     if (batch) {
-      batch.set(docRef, payload);
+      batch.set(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     } else {
-      await setDoc(docRef, payload);
+      await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     }
   }
 

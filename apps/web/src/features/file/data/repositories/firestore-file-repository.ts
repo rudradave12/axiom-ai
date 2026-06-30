@@ -13,6 +13,7 @@ import {
 import { db } from '@/shared/lib/firebase';
 import { FileRepository } from '../../domain/repositories/file-repository';
 import { AxiomFile, FileProcessingStatus } from '../../domain/entities/file';
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 
 interface FirestoreFileDoc {
   name?: string;
@@ -76,7 +77,7 @@ export class FirestoreFileRepository implements FileRepository {
       processedAt: file.processedAt ? Timestamp.fromDate(file.processedAt) : null,
       isDeleted: file.isDeleted,
     };
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async updateFile(
@@ -96,7 +97,7 @@ export class FirestoreFileRepository implements FileRepository {
     if (updates.processedAt !== undefined) payload.processedAt = updates.processedAt ? Timestamp.fromDate(updates.processedAt) : null;
     if (updates.isDeleted !== undefined) payload.isDeleted = updates.isDeleted;
 
-    await updateDoc(docRef, payload);
+    await updateDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async softDeleteFile(userId: string, missionId: string, fileId: string): Promise<void> {

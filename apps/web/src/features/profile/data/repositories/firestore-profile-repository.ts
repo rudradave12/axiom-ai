@@ -9,6 +9,7 @@ import {
 import { db } from '@/shared/lib/firebase';
 import { ProfileRepository } from '../../domain/repositories/profile-repository';
 import { UserProfile, UserPreferences } from '../../domain/entities/profile';
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 
 interface FirestoreProfileDoc {
   email?: string;
@@ -75,7 +76,7 @@ export class FirestoreProfileRepository implements ProfileRepository {
       preferences: profile.preferences,
       stats: profile.stats,
     };
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async updateProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
@@ -85,7 +86,7 @@ export class FirestoreProfileRepository implements ProfileRepository {
     if (updates.photoURL !== undefined) payload.photoURL = updates.photoURL;
     if (updates.lastActiveAt !== undefined) payload.lastActiveAt = Timestamp.fromDate(updates.lastActiveAt);
     if (updates.stats !== undefined) payload.stats = updates.stats;
-    await updateDoc(docRef, payload);
+    await updateDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async updatePreferences(uid: string, preferences: Partial<UserPreferences>): Promise<void> {
@@ -94,7 +95,7 @@ export class FirestoreProfileRepository implements ProfileRepository {
     Object.keys(preferences).forEach((key) => {
       payload[`preferences.${key}`] = (preferences as Record<string, unknown>)[key];
     });
-    await updateDoc(docRef, payload);
+    await updateDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public onProfileChanged(uid: string, callback: (profile: UserProfile | null) => void): () => void {

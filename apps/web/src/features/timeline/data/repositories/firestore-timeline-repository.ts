@@ -1,3 +1,4 @@
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 import {
   doc,
   getDoc,
@@ -133,9 +134,9 @@ export class FirestoreTimelineRepository implements TimelineRepository {
       updatedAt: Timestamp.fromDate(timeline.updatedAt),
     };
     if (batch) {
-      batch.set(docRef, payload);
+      batch.set(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     } else {
-      await setDoc(docRef, payload);
+      await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     }
   }
 

@@ -9,6 +9,7 @@ import {
 import { db } from '@/shared/lib/firebase';
 import { ChatRepository } from '../../domain/repositories/chat-repository';
 import { CopilotConversation, CopilotMessage } from '../../domain/entities/chat';
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 
 interface FirestoreMessageDoc {
   id?: string;
@@ -77,7 +78,7 @@ export class FirestoreChatRepository implements ChatRepository {
       createdAt: Timestamp.fromDate(conversation.createdAt),
       updatedAt: Timestamp.fromDate(conversation.updatedAt),
     };
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public subscribeConversations(

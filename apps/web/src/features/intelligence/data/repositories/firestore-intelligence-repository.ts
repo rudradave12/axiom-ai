@@ -9,6 +9,7 @@ import {
 import { db } from '@/shared/lib/firebase';
 import { IntelligenceRepository } from '../../domain/repositories/intelligence-repository';
 import { MissionProfile, MissionObjective, MissionConstraint } from '../../domain/entities/intelligence';
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 
 interface FirestoreProfileDoc {
   missionType?: string;
@@ -84,9 +85,9 @@ export class FirestoreIntelligenceRepository implements IntelligenceRepository {
       updatedAt: Timestamp.fromDate(profile.updatedAt),
     };
     if (batch) {
-      batch.set(docRef, payload);
+      batch.set(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     } else {
-      await setDoc(docRef, payload);
+      await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     }
   }
 

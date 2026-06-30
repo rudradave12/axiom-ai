@@ -12,6 +12,7 @@ import {
 import { db } from '@/shared/lib/firebase';
 import { TaskRepository } from '../../domain/repositories/task-repository';
 import { MissionTask } from '../../domain/entities/task';
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 
 interface FirestoreTaskDoc {
   id?: string;
@@ -63,7 +64,7 @@ export class FirestoreTaskRepository implements TaskRepository {
       ...task,
       updatedAt: Timestamp.fromDate(task.updatedAt),
     };
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async saveTasksBulk(userId: string, missionId: string, tasks: MissionTask[], externalBatch?: WriteBatch): Promise<void> {
@@ -74,7 +75,7 @@ export class FirestoreTaskRepository implements TaskRepository {
         ...task,
         updatedAt: Timestamp.fromDate(task.updatedAt),
       };
-      batch.set(docRef, payload);
+      batch.set(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
     });
     if (!externalBatch) {
       await batch.commit();

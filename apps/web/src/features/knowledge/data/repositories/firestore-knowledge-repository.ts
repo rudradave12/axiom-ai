@@ -13,6 +13,7 @@ import {
 import { db } from '@/shared/lib/firebase';
 import { KnowledgeRepository } from '../../domain/repositories/knowledge-repository';
 import { KnowledgeConcept, KnowledgeCollection, KnowledgeDepth } from '../../domain/entities/knowledge';
+import { sanitizeFirestorePayload } from '../../../../shared/lib/firestore-utils';
 
 interface FirestoreConceptDoc {
   label?: string;
@@ -103,7 +104,7 @@ export class FirestoreKnowledgeRepository implements KnowledgeRepository {
       tags: concept.tags,
       category: concept.category,
     };
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async updateConcept(
@@ -126,7 +127,7 @@ export class FirestoreKnowledgeRepository implements KnowledgeRepository {
     if (updates.relatedConceptIds !== undefined) payload.relatedConceptIds = updates.relatedConceptIds;
     if (updates.sourceFileIds !== undefined) payload.sourceFileIds = updates.sourceFileIds;
 
-    await updateDoc(docRef, payload);
+    await updateDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async softDeleteConcept(userId: string, missionId: string, conceptId: string): Promise<void> {
@@ -170,7 +171,7 @@ export class FirestoreKnowledgeRepository implements KnowledgeRepository {
       createdAt: Timestamp.fromDate(collectionData.createdAt),
       isDeleted: collectionData.isDeleted,
     };
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public async updateCollection(
@@ -186,7 +187,7 @@ export class FirestoreKnowledgeRepository implements KnowledgeRepository {
     if (updates.description !== undefined) payload.description = updates.description;
     if (updates.conceptIds !== undefined) payload.conceptIds = updates.conceptIds;
 
-    await updateDoc(docRef, payload);
+    await updateDoc(docRef, sanitizeFirestorePayload(payload) as Record<string, unknown>);
   }
 
   public subscribeCollections(
