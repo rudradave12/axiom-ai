@@ -1,25 +1,34 @@
-export function sanitizeFirestorePayload<T extends Record<string, unknown>>(payload: T): Partial<T> {
-  const sanitized: Record<string, unknown> = {};
-  
-  for (const [key, value] of Object.entries(payload)) {
-    if (value !== undefined) {
-      if (
-        value !== null && 
-        typeof value === 'object' && 
-        !Array.isArray(value) && 
-        !(value instanceof Date) &&
-        !('toDate' in value && typeof (value as { toDate?: unknown }).toDate === 'function') // avoid recursing into Firestore Timestamps
-      ) {
-        // Recursively sanitize nested objects
-        const nestedSanitized = sanitizeFirestorePayload(value as Record<string, unknown>);
-        if (Object.keys(nestedSanitized).length > 0) {
-          sanitized[key] = nestedSanitized;
-        }
-      } else {
-        sanitized[key] = value;
-      }
-    }
+export function sanitizeFirestorePayload<T>(payload: T): T {
+  if (payload === undefined) {
+    return payload; // Shouldn't be called directly with undefined at root, but just in case
   }
   
-  return sanitized as Partial<T>;
+  if (payload === null) {
+    return payload;
+  }
+
+  if (Array.isArray(payload)) {
+    // Recursively sanitize each element in the array
+    // Filter out undefined elements completely just in case
+    return payload
+      .filter((item) => item !== undefined)
+      .map((item) => sanitizeFirestorePayload(item)) as unknown as T;
+  }
+
+  if (
+    typeof payload === 'object' &&
+    !(payload instanceof Date) &&
+    !('toDate' in payload && typeof (payload as { toDate?: unknown }).toDate === 'function')
+  ) {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (value !== undefined) {
+        sanitized[key] = sanitizeFirestorePayload(value);
+      }
+    }
+    return sanitized as T;
+  }
+
+  // Primitive value (string, number, boolean) or Firestore Timestamp/Date
+  return payload;
 }
